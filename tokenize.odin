@@ -21,3 +21,8 @@ skip_whitespace :: proc(tokenizer: ^Tokenizer) {
 		}
 	}
 }
+
+peek :: proc(tokenizer: ^Tokenizer) -> u8 {
+	assert(tokenizer.idx < len(tokenizer.source))
+	return tokenizer.source[tokenizer.idx]
+}
