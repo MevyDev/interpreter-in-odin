@@ -1,3 +1,10 @@
 package main
 
-Tokenizer :: struct {}
+Tokenizer :: struct {
+	source:      string,
+	source_path: string,
+	idx:         int,
+	line:        int,
+	col:         int,
+}
+
