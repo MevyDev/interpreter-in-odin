@@ -28,3 +28,14 @@ peek :: proc(tokenizer: ^Tokenizer) -> u8 {
 	}
 	return tokenizer.source[tokenizer.idx]
 }
+
+advance :: proc(tokenizer: ^Tokenizer) {
+	switch tokenizer.source[tokenizer.idx] {
+	case '\n':
+		tokenizer.idx += 1
+		tokenizer.line += 1
+		tokenizer.col = 0
+	case:
+		tokenizer.idx += 1
+	}
+}
