@@ -71,6 +71,17 @@ digit_value :: proc(char: u8) -> int {
 		return 255
 	}
 }
+
+scan_num :: proc(t: ^Tokenizer) -> Token {
+	start_pos := t.pos
+
+	for digit_value(peek(t)) < 10 {
+		advance(t)
+	}
+
+	return Token{kind = .Integer, literal = t.source[start_pos.idx:t.idx], pos = start_pos}
+}
+
 scan :: proc(t: ^Tokenizer) -> Token {
 	if t.idx >= len(t.source) {
 		return eof_token(t)
@@ -86,7 +97,7 @@ scan :: proc(t: ^Tokenizer) -> Token {
 	case 0:
 		return eof_token(t)
 	case '0' ..= '9':
-	// return scan_num(t)
+		return scan_num(t)
 	case 'a' ..= 'z', 'A' ..= 'Z', '_':
 	// return scan_iden(t)
 	case:
