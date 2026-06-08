@@ -82,6 +82,37 @@ scan_num :: proc(t: ^Tokenizer) -> Token {
 	return Token{kind = .Integer, literal = t.source[start_pos.idx:t.idx], pos = start_pos}
 }
 
+scan_iden :: proc(t: ^Tokenizer) -> Token {
+	start_pos := t.pos
+
+	loop: for true {
+		switch ch := peek(t); ch {
+		case 'a' ..= 'z', 'A' ..= 'Z', '_':
+			advance(t)
+		case:
+			break loop
+		}
+	}
+
+	kind: TokenKind
+	lit := t.source[start_pos.idx:t.idx]
+
+	switch lit {
+	case "and":
+		kind = .And
+	case "if":
+		kind = .If
+	case "or":
+		kind = .Or
+	case "loop":
+		kind = .Loop
+	case:
+		kind = .Identifier
+	}
+
+	return Token{kind = kind, literal = lit, pos = start_pos}
+}
+
 scan :: proc(t: ^Tokenizer) -> Token {
 	if t.idx >= len(t.source) {
 		return eof_token(t)
@@ -99,7 +130,7 @@ scan :: proc(t: ^Tokenizer) -> Token {
 	case '0' ..= '9':
 		return scan_num(t)
 	case 'a' ..= 'z', 'A' ..= 'Z', '_':
-	// return scan_iden(t)
+		return scan_iden(t)
 	case:
 		advance(t)
 		switch ch {
