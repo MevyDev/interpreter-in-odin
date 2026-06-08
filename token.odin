@@ -29,7 +29,7 @@ TokenKind :: enum {
 	Add, // +
 	Sub, // -
 	Mul, // *
-	Quo, // /
+	Div, // /
 	Mod, // %
 
 	// Keywords
