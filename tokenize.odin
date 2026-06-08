@@ -6,83 +6,83 @@ Tokenizer :: struct {
 	using pos:   Pos,
 }
 
-skip_whitespace :: proc(tokenizer: ^Tokenizer) {
-	assert(tokenizer.idx < len(tokenizer.source))
-	for tokenizer.idx < len(tokenizer.source) {
-		switch tokenizer.source[tokenizer.idx] {
+skip_whitespace :: proc(t: ^Tokenizer) {
+	assert(t.idx < len(t.source))
+	for t.idx < len(t.source) {
+		switch t.source[t.idx] {
 		case '\n':
-			tokenizer.idx += 1
-			tokenizer.line += 1
-			tokenizer.col = 0
+			t.idx += 1
+			t.line += 1
+			t.col = 0
 		case ' ', '\r':
-			tokenizer.idx += 1
+			t.idx += 1
 		case:
 			return
 		}
 	}
 }
 
-peek :: proc(tokenizer: ^Tokenizer) -> u8 {
-	if tokenizer.idx >= len(tokenizer.source) {
+peek :: proc(t: ^Tokenizer) -> u8 {
+	if t.idx >= len(t.source) {
 		return 0
 	}
-	return tokenizer.source[tokenizer.idx]
+	return t.source[t.idx]
 }
 
-advance :: proc(tokenizer: ^Tokenizer) {
-	assert(tokenizer.idx < len(tokenizer.source))
-	switch tokenizer.source[tokenizer.idx] {
+advance :: proc(t: ^Tokenizer) {
+	assert(t.idx < len(t.source))
+	switch t.source[t.idx] {
 	case '\n':
-		tokenizer.idx += 1
-		tokenizer.line += 1
-		tokenizer.col = 0
+		t.idx += 1
+		t.line += 1
+		t.col = 0
 	case:
-		tokenizer.idx += 1
+		t.idx += 1
 	}
 }
 
-eof_token :: proc(tokenizer: ^Tokenizer) -> Token {
-	return Token{kind = .EOF, pos = tokenizer.pos, literal = ""}
+eof_token :: proc(t: ^Tokenizer) -> Token {
+	return Token{kind = .EOF, pos = t.pos, literal = ""}
 }
 
-scan_comment :: proc(tokenizer: ^Tokenizer) -> Token {
+scan_comment :: proc(t: ^Tokenizer) -> Token {
 	// it's on the same line, we can just deadvance this way
-	tokenizer.idx -= 1
-	tokenizer.col -= 1
-	pos := tokenizer.pos
+	t.idx -= 1
+	t.col -= 1
+	pos := t.pos
 	loop: for true {
-		switch peek(tokenizer) {
+		switch peek(t) {
 		case 0, '\n', '\r':
 			break loop
 		}
-		advance(tokenizer)
+		advance(t)
 	}
 	kind: TokenKind = .Comment
-	assert(tokenizer.idx < len(tokenizer.source))
-	lit: string = tokenizer.source[pos.idx:tokenizer.idx]
+	assert(t.idx < len(t.source))
+	lit: string = t.source[pos.idx:t.idx]
 	return Token{kind = kind, literal = lit, pos = pos}
 }
 
-scan :: proc(tokenizer: ^Tokenizer) -> Token {
-	if tokenizer.idx >= len(tokenizer.source) {
-		return eof_token(tokenizer)
+scan :: proc(t: ^Tokenizer) -> Token {
+	if t.idx >= len(t.source) {
+		return eof_token(t)
 	}
 
-	skip_whitespace(tokenizer)
+	skip_whitespace(t)
 
-	start_pos := tokenizer.pos
+	start_pos := t.pos
 	kind: TokenKind
 	lit: string
 
-	switch ch := peek(tokenizer); ch {
+	switch ch := peek(t); ch {
 	case 0:
-		return eof_token(tokenizer)
+		return eof_token(t)
 	case '0' ..= '9':
-	// return scan_num(tokenizer)
+	// return scan_num(t)
 	case 'a' ..= 'z', 'A' ..= 'Z', '_':
-	// return scan_iden(tokenizer)
+	// return scan_iden(t)
 	case:
-		advance(tokenizer)
+		advance(t)
 		switch ch {
 		case ';':
 			kind = .Semicolon
@@ -90,9 +90,9 @@ scan :: proc(tokenizer: ^Tokenizer) -> Token {
 			kind = .Mul
 		case '/':
 			kind = .Div
-			if peek(tokenizer) == '/' {
+			if peek(t) == '/' {
 				// the position is deadvanced inside the scan_comment proc
-				return scan_comment(tokenizer)
+				return scan_comment(t)
 			}
 		case '+':
 			kind = .Add
@@ -100,24 +100,24 @@ scan :: proc(tokenizer: ^Tokenizer) -> Token {
 			kind = .Sub
 		case '=':
 			kind = .Assign
-			if peek(tokenizer) == '=' {
-				advance(tokenizer)
+			if peek(t) == '=' {
+				advance(t)
 				kind = .Eql
 			}
 		case '%':
 			kind = .Mod
 		case '!':
 			kind = .Not
-			if peek(tokenizer) == '=' {
-				advance(tokenizer)
+			if peek(t) == '=' {
+				advance(t)
 				kind = .NotEql
 			}
 		}
 	}
 
 	if lit == "" {
-		lit = tokenizer.source[start_pos.idx:tokenizer.idx]
+		lit = t.source[start_pos.idx:t.idx]
 	}
 
-	return Token{kind = kind, literal = lit, pos = tokenizer.pos}
+	return Token{kind = kind, literal = lit, pos = t.pos}
 }
