@@ -45,3 +45,61 @@ eof_token :: proc(tokenizer: ^Tokenizer) -> Token {
 	return Token{kind = .EOF, pos = tokenizer.pos, literal = ""}
 }
 
+scan :: proc(tokenizer: ^Tokenizer) -> Token {
+	if tokenizer.idx >= len(tokenizer.source) {
+		return eof_token(tokenizer)
+	}
+
+	skip_whitespace(tokenizer)
+
+	start_pos := tokenizer.pos
+	kind: TokenKind
+	lit: string
+
+	switch ch := peek(tokenizer); ch {
+	case 0:
+		return eof_token(tokenizer)
+	case '0' ..= '9':
+	// return scan_num(tokenizer)
+	case 'a' ..= 'z', 'A' ..= 'Z', '_':
+	// return scan_iden(tokenizer)
+	case:
+		advance(tokenizer)
+		switch ch {
+		case ';':
+			kind = .Semicolon
+		case '*':
+			kind = .Mul
+		case '/':
+			kind = .Div
+			if peek(tokenizer) == '/' {
+				// the position is deadvanced inside the scan_comment proc
+				// return scan_comment(tokenizer)
+			}
+		case '+':
+			kind = .Add
+		case '-':
+			kind = .Sub
+		case '=':
+			kind = .Assign
+			if peek(tokenizer) == '=' {
+				advance(tokenizer)
+				kind = .Eql
+			}
+		case '%':
+			kind = .Mod
+		case '!':
+			kind = .Not
+			if peek(tokenizer) == '!' {
+				advance(tokenizer)
+				kind = .NotEql
+			}
+		}
+	}
+
+	if lit == "" {
+		lit = tokenizer.source[start_pos.idx:tokenizer.idx]
+	}
+
+	return Token{kind = kind, literal = lit, pos = tokenizer.pos}
+}
