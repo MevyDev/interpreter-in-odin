@@ -45,6 +45,24 @@ eof_token :: proc(tokenizer: ^Tokenizer) -> Token {
 	return Token{kind = .EOF, pos = tokenizer.pos, literal = ""}
 }
 
+scan_comment :: proc(tokenizer: ^Tokenizer) -> Token {
+	// it's on the same line, we can just deadvance this way
+	tokenizer.idx -= 1
+	tokenizer.col -= 1
+	pos := tokenizer.pos
+	loop: for true {
+		switch peek(tokenizer) {
+		case 0, '\n', '\r':
+			break loop
+		}
+		advance(tokenizer)
+	}
+	kind: TokenKind = .Comment
+	assert(tokenizer.idx < len(tokenizer.source))
+	lit: string = tokenizer.source[pos.idx:tokenizer.idx]
+	return Token{kind = kind, literal = lit, pos = pos}
+}
+
 scan :: proc(tokenizer: ^Tokenizer) -> Token {
 	if tokenizer.idx >= len(tokenizer.source) {
 		return eof_token(tokenizer)
@@ -74,7 +92,7 @@ scan :: proc(tokenizer: ^Tokenizer) -> Token {
 			kind = .Div
 			if peek(tokenizer) == '/' {
 				// the position is deadvanced inside the scan_comment proc
-				// return scan_comment(tokenizer)
+				return scan_comment(tokenizer)
 			}
 		case '+':
 			kind = .Add
