@@ -31,11 +31,11 @@ TokenKind :: enum {
 	Mul, // *
 	Div, // /
 	Mod, // %
+	Assign, // =
 
 	// Keywords
 	Loop, // loop
 	If, // if
 	And, // and
 	Or, // or
-	Assign, // =
 }
