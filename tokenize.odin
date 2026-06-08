@@ -63,6 +63,14 @@ scan_comment :: proc(t: ^Tokenizer) -> Token {
 	return Token{kind = kind, literal = lit, pos = pos}
 }
 
+digit_value :: proc(char: u8) -> int {
+	switch char {
+	case '0' ..= '9':
+		return int(char - '0')
+	case:
+		return 255
+	}
+}
 scan :: proc(t: ^Tokenizer) -> Token {
 	if t.idx >= len(t.source) {
 		return eof_token(t)
