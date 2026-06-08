@@ -30,6 +30,7 @@ peek :: proc(tokenizer: ^Tokenizer) -> u8 {
 }
 
 advance :: proc(tokenizer: ^Tokenizer) {
+	assert(tokenizer.idx < len(tokenizer.source))
 	switch tokenizer.source[tokenizer.idx] {
 	case '\n':
 		tokenizer.idx += 1
