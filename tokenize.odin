@@ -108,7 +108,7 @@ scan :: proc(tokenizer: ^Tokenizer) -> Token {
 			kind = .Mod
 		case '!':
 			kind = .Not
-			if peek(tokenizer) == '!' {
+			if peek(tokenizer) == '=' {
 				advance(tokenizer)
 				kind = .NotEql
 			}
