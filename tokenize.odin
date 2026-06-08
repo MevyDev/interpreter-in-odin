@@ -40,3 +40,8 @@ advance :: proc(tokenizer: ^Tokenizer) {
 		tokenizer.idx += 1
 	}
 }
+
+eof_token :: proc(tokenizer: ^Tokenizer) -> Token {
+	return Token{kind = .EOF, pos = tokenizer.pos, literal = ""}
+}
+
